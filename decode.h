@@ -46,6 +46,8 @@ Status decode_secret_file_exte(DecodeInfo*decInfo ,int exte_size);
 /*Decode secret file data from secret.bmp*/
 Status decode_secret_file_data(DecodeInfo*decInfo);
 
+//extension part of op file
+Status open_output_file(DecodeInfo *decInfo);
 
 /*close all open file */
 Status close_decode_files(DecodeInfo*decInfo);

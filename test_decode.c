@@ -24,7 +24,7 @@ int main(int argc,char*argv[]){
             
                 printf("\n" CYAN);
                 printf("+------------------------------------------------+\n");
-                printf(RESET GREEN "       ENCODING COMPLETED SUCCESSFULLY\n" RESET);
+                printf(RESET GREEN "       DECODING COMPLETED SUCCESSFULLY\n" RESET);
                 printf(CYAN "+------------------------------------------------+\n" RESET);
             }
             

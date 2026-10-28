@@ -41,6 +41,10 @@ Status Do_decoding(DecodeInfo*decInfo){
             printf("\033[1;32m✔ Secret file extension decoded successfully\033[0m\n");
         
         }
+        //op file extenion part
+        if(open_output_file(decInfo) == e_failure) {
+                return e_failure;
+        }
         //printf("ext size=%d ext=%s\n",exte_size,decInfo->secre_file_extn);
 
 
@@ -51,9 +55,12 @@ Status Do_decoding(DecodeInfo*decInfo){
         }
 
 
-        if(decode_secret_file_data(decInfo)==e_success){
-        
+        if(decode_secret_file_data(decInfo)==e_success) {
             printf("\033[1;32m✔ Secret file data decoded successfully\033[0m\n");
+        }
+        else {
+            printf("Secret file data decoding failed\n");
+            return e_failure;
         }
 
 
@@ -73,63 +80,41 @@ Status Do_decoding(DecodeInfo*decInfo){
 
 }
 /*Function for file opening*/
-Status open_decode_file(DecodeInfo*decInfo){
-    decInfo->fptr_stego_img=fopen(decInfo->stego_img_fname,"rb");
-    if(decInfo->fptr_stego_img==NULL){
-       perror("fopen");
-       fprintf(stderr, "\033[1;31m✘ Error: Unable to open file %s\033[0m\n", decInfo->stego_img_fname);
-       return e_failure;
-    }
-    decInfo->fptr_decode_file=fopen(decInfo->decode_file_fname,"wb");
-    if(decInfo->fptr_decode_file==NULL){
+Status open_decode_file(DecodeInfo *decInfo){
+    decInfo->fptr_stego_img = fopen(decInfo->stego_img_fname, "rb");
+
+    if(decInfo->fptr_stego_img == NULL){
         perror("fopen");
-        fprintf(stderr, "\033[1;31m✘ Error: Unable to create output file %s\033[0m\n", decInfo->decode_file_fname);
-        fclose(decInfo->fptr_stego_img);
+        fprintf(stderr, "\033[1;31mError: Unable to open stego image %s\033[0m\n",
+                decInfo->stego_img_fname);
         return e_failure;
     }
+
     return e_success;
 }
 
 /*for read and validte the function inputs*/
 
-Status read_and_validate_decode_args(int argc,char*argv[],DecodeInfo *decode){
-    if(argc<3 || argc>4){
+
+Status read_and_validate_decode_args(int argc, char *argv[], DecodeInfo *decode){
+    if (argc < 3 || argc > 4){
         return e_failure;
     }
 
-    if(strstr(argv[2],".bmp")!=NULL){
-        decode->stego_img_fname=argv[2];
-        if(argc==4){
-        if(strstr(argv[3],".txt")!=NULL){
-                decode->decode_file_fname=argv[3];
-                char *ptr= strrchr(decode->decode_file_fname,'.');
-                int len=ptr-decode->decode_file_fname;
-                char fname[100];
-                strncpy(fname,argv[3],len);
-                fname[len]='\0';
-                strcat(fname,decode->secre_file_extn);
-         
-            }
+    if (strstr(argv[2], ".bmp") != NULL){
+        decode->stego_img_fname = argv[2];
+
+        if (argc == 4){
+            decode->decode_file_fname = argv[3];
         }
-        if(argc==3){
-            decode->decode_file_fname="Decode.txt";
-        }
-        else if(argc==4){ 
-                if(strstr(argv[3],".txt")!=NULL){
-                decode->decode_file_fname=argv[3];
-            }
-            else{
-                return e_failure;
-            }
+        else{
+            decode->decode_file_fname = "Decode";
         }
 
+        return e_success;
     }
-    else{
-        return e_failure;
-    }
-    return e_success;
-    
 
+    return e_failure;
 }
 
 /*skip bmp header of 54 bytes */
@@ -283,10 +268,37 @@ Status decode_secret_file_data(DecodeInfo*decInfo){
     }
     return e_success;
 }
+//output file extenion part
+Status open_output_file(DecodeInfo *decInfo)
+{
+    char output_fname[100];
 
+    strcpy(output_fname, decInfo->decode_file_fname);
+
+    char *dot = strrchr(output_fname, '.');
+
+    if(dot != NULL) {
+        *dot = '\0';
+    }
+
+    strcat(output_fname, decInfo->secre_file_extn);
+
+    decInfo->fptr_decode_file = fopen(output_fname, "wb");
+
+    if(decInfo->fptr_decode_file == NULL) {
+        perror("fopen");
+        return e_failure;
+    }
+
+    //printf("Output file created: %s\n", output_fname);
+
+    return e_success;
+}
 /*close all files*/
 Status close_decode_files(DecodeInfo*decInfo){
     fclose(decInfo->fptr_decode_file);
     fclose(decInfo->fptr_stego_img);
     return e_success;
 }
+
+
